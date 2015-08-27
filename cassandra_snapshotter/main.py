@@ -47,7 +47,7 @@ def run_backup(args):
         aws_secret_access_key=args.aws_secret_access_key,
         s3_bucket_region=args.s3_bucket_region,
         s3_ssenc=args.s3_ssenc,
-        s3_connection_host=get_s3_connection_host(args.s3_bucket_region),
+        s3_connection_host=args.s3_connection_host,
         cassandra_conf_path=args.cassandra_conf_path,
         nodetool_path=args.nodetool_path,
         cassandra_bin_dir=args.cassandra_bin_dir,
@@ -236,6 +236,9 @@ def main():
 
     if args.verbose:
         logging.basicConfig(level=logging.INFO)
+
+    if args.s3_bucket_region:
+        args.s3_connection_host = get_s3_connection_host(args.s3_bucket_region)
 
     if subcommand == 'backup':
         run_backup(args)

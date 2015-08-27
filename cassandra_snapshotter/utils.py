@@ -49,6 +49,9 @@ def add_s3_arguments(arg_parser):
                             required=True,
                             help="S3 base path for backups.")
 
+    arg_parser.add_argument('--s3-connection-host',
+                            help="S3 host for backups.")
+
     return arg_parser
 
 

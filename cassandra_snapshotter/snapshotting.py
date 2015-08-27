@@ -94,12 +94,14 @@ class Snapshot(object):
 
 
 class RestoreWorker(object):
-    def __init__(self, aws_access_key_id, aws_secret_access_key, snapshot):
+    def __init__(self, aws_access_key_id, aws_secret_access_key, s3_connection_host, snapshot):
         self.aws_secret_access_key = aws_secret_access_key
         self.aws_access_key_id = aws_access_key_id
+        self.s3_connection_host = s3_connection_host
         self.s3connection = S3Connection(
             aws_access_key_id=self.aws_access_key_id,
-            aws_secret_access_key=self.aws_secret_access_key)
+            aws_secret_access_key=self.aws_secret_access_key,
+            host=self.s3_connection_host)
         self.snapshot = snapshot
         self.keyspace_table_matcher = None
 
@@ -287,6 +289,7 @@ class BackupWorker(object):
             --aws-secret-access-key=%(secret)s \
             --s3-bucket-name=%(bucket)s \
             --s3-bucket-region=%(s3_bucket_region)s %(s3_ssenc)s \
+            --s3-connection-host=%(s3_connection_host)s \
             --s3-base-path=%(prefix)s \
             --manifest=%(manifest)s \
             --bufsize=%(bufsize)s \
@@ -295,6 +298,7 @@ class BackupWorker(object):
             bucket=snapshot.s3_bucket,
             s3_bucket_region=self.s3_bucket_region,
             s3_ssenc=self.s3_ssenc and '--s3-ssenc' or '',
+            s3_connection_host=self.s3_connection_host,
             prefix=prefix,
             key=self.aws_access_key_id,
             secret=self.aws_secret_access_key,
@@ -451,8 +455,9 @@ class SnapshotCollection(object):
 
     def __init__(
             self, aws_access_key_id,
-            aws_secret_access_key, base_path, s3_bucket):
+            aws_secret_access_key, base_path, s3_bucket, s3_connection_host):
         self.s3_bucket = s3_bucket
+        self.s3_connection_host = s3_connection_host
         self.base_path = base_path
         self.snapshots = None
         self.aws_access_key_id = aws_access_key_id
@@ -462,7 +467,7 @@ class SnapshotCollection(object):
         if self.snapshots:
             return
 
-        conn = S3Connection(self.aws_access_key_id, self.aws_secret_access_key)
+        conn = S3Connection(self.aws_access_key_id, self.aws_secret_access_key, host=self.s3_connection_host)
         bucket = conn.get_bucket(self.s3_bucket, validate=False)
         self.snapshots = []
         prefix = self.base_path

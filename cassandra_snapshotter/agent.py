@@ -255,7 +255,7 @@ def main():
         check_lzop()
         put_from_manifest(
             args.s3_bucket_name,
-            get_s3_connection_host(args.s3_bucket_region),
+            args.s3_connection_host,
             args.s3_ssenc,
             args.s3_base_path,
             args.aws_access_key_id,
